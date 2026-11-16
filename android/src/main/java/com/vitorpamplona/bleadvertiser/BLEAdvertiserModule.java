@@ -48,7 +48,7 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
 
     public static final String TAG = "BleAdvertiserXX0";
     private BluetoothAdapter mBluetoothAdapter;
-    
+
     private static Hashtable<String, BluetoothLeAdvertiser> mAdvertiserList;
     private static Hashtable<String, AdvertiseCallback> mAdvertiserCallbackList;
     private static BluetoothLeScanner mScanner;
@@ -67,7 +67,7 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
                 .getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager != null) {
             mBluetoothAdapter = bluetoothManager.getAdapter();
-        } 
+        }
 
         if (mBluetoothAdapter != null) {
             mObservedState = mBluetoothAdapter.isEnabled();
@@ -78,7 +78,7 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         reactContext.registerReceiver(mReceiver, filter);
     }
-    
+
     @Override
     public String getName() {
         return "BLEAdvertiser";
@@ -119,19 +119,19 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
             Log.w("BLEAdvertiserModule", "Device does not support Bluetooth. Adapter is Null");
             promise.reject("Device does not support Bluetooth. Adapter is Null");
             return;
-        } 
-        
+        }
+
         if (companyId == 0x0000) {
             Log.w("BLEAdvertiserModule", "Invalid company id");
             promise.reject("Invalid company id");
             return;
-        } 
-        
+        }
+
         if (mBluetoothAdapter == null) {
             Log.w("BLEAdvertiserModule", "mBluetoothAdapter unavailable");
             promise.reject("mBluetoothAdapter unavailable");
             return;
-        } 
+        }
 
         if (mObservedState != null && !mObservedState) {
             Log.w("BLEAdvertiserModule", "Bluetooth disabled");
@@ -147,20 +147,20 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
             tempCallback = mAdvertiserCallbackList.remove(uid);
 
             //tempAdvertiser.stopAdvertising(tempCallback);
-        } 
-	    
+        }
+
         tempAdvertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
         tempCallback = new BLEAdvertiserModule.SimpleAdvertiseCallback(promise);
-        
-         
+
+
         if (tempAdvertiser == null) {
             Log.w("BLEAdvertiserModule", "Advertiser Not Available unavailable");
             promise.reject("Advertiser unavailable on this device");
             return;
         }
-        
-	Log.w("BLEAdvertiserModule", "Advertisers data:" + arrToString(toByteArray(payload)));
-	    
+
+        Log.w("BLEAdvertiserModule", "Advertisers data:" + arrToString(toByteArray(payload)));
+
         AdvertiseSettings settings = buildAdvertiseSettings(options);
         AdvertiseData data = buildAdvertiseData(ParcelUuid.fromString(uid), toByteArray(payload), options);
 
@@ -185,7 +185,7 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
         }
         return array;
     }
-	
+
     private String arrToString(byte[] _arr)
     {
         String ret = "";
@@ -197,7 +197,7 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
         return ret;
     }
 
-   @ReactMethod
+    @ReactMethod
     public void stopBroadcast(final Promise promise) {
         Log.w("BLEAdvertiserModule", "Stop Broadcast call");
 
@@ -205,7 +205,7 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
             Log.w("BLEAdvertiserModule", "mBluetoothAdapter unavailable");
             promise.reject("mBluetoothAdapter unavailable");
             return;
-        } 
+        }
 
         if (mObservedState != null && !mObservedState) {
             Log.w("BLEAdvertiserModule", "Bluetooth disabled");
@@ -229,7 +229,7 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-	public void scanByService(String uid, ReadableMap options, Promise promise) {
+    public void scanByService(String uid, ReadableMap options, Promise promise) {
         scan(uid, null, options, promise);
     }
 
@@ -238,7 +238,7 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
         scan(null, manufacturerPayload, options, promise);
     }
 
-	public void scan(String uid, ReadableArray manufacturerPayload, ReadableMap options, Promise promise) {
+    public void scan(String uid, ReadableArray manufacturerPayload, ReadableMap options, Promise promise) {
         if (mBluetoothAdapter == null) {
             promise.reject("Device does not support Bluetooth. Adapter is Null");
             return;
@@ -251,14 +251,14 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
         }
 
         if (mScannerCallback == null) {
-            // Cannot change. 
+            // Cannot change.
             mScannerCallback = new SimpleScanCallback();
-        } 
-        
+        }
+
         if (mScanner == null) {
             mScanner = mBluetoothAdapter.getBluetoothLeScanner();
         } else {
-            // was running. Needs to stop first. 
+            // was running. Needs to stop first.
             mScanner.stopScan(mScannerCallback);
         }
 
@@ -266,26 +266,26 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
             Log.w("BLEAdvertiserModule", "Scanner Not Available unavailable");
             promise.reject("Scanner unavailable on this device");
             return;
-        } 
+        }
 
         ScanSettings scanSettings = buildScanSettings(options);
-    
+
         List<ScanFilter> filters = new ArrayList<>();
         if (manufacturerPayload != null)
             filters.add(new ScanFilter.Builder().setManufacturerData(companyId, toByteArray(manufacturerPayload)).build());
-        if (uid != null) 
+        if (uid != null)
             filters.add(new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uid)).build());
-        
+
         mScanner.startScan(filters, scanSettings, mScannerCallback);
         promise.resolve("Scanner started");
     }
 
     @ReactMethod
-	public void stopScan(Promise promise) {
+    public void stopScan(Promise promise) {
         if (mBluetoothAdapter == null) {
             promise.reject("Device does not support Bluetooth. Adapter is Null");
             return;
-        } 
+        }
 
         if (mObservedState != null && !mObservedState) {
             Log.w("BLEAdvertiserModule", "Bluetooth disabled");
@@ -307,7 +307,7 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
 
         if (options != null && options.hasKey("scanMode")) {
             scanSettingsBuilder.setScanMode(options.getInt("scanMode"));
-        } 
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (options != null && options.hasKey("numberOfMatches")) {
@@ -326,8 +326,8 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
     }
 
     private class SimpleScanCallback extends ScanCallback {
-		@Override
-		public void onScanResult(int callbackType, ScanResult result) {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
             Log.w("BLEAdvertiserModule", "Scanned: " + result.toString());
 
             WritableMap params = Arguments.createMap();
@@ -341,7 +341,7 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
 
             params.putArray("serviceUuids", paramsUUID);
             params.putInt("rssi", result.getRssi());
-            
+
             if (result.getScanRecord() != null) {
                 params.putInt("txPower", result.getScanRecord().getTxPowerLevel());
                 params.putString("deviceName", result.getScanRecord().getDeviceName());
@@ -351,21 +351,21 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
                     params.putArray("manufData", toByteArray(result.getScanRecord().getManufacturerSpecificData(companyId)));
                 }
             }
-            
+
             if (result.getDevice() != null) {
                 params.putString("deviceAddress", result.getDevice().getAddress());
             }
 
             sendEvent("onDeviceFound", params);
-		}
+        }
 
-		@Override
-		public void onBatchScanResults(final List<ScanResult> results) {
+        @Override
+        public void onBatchScanResults(final List<ScanResult> results) {
 
-		}
+        }
 
-		@Override
-		public void onScanFailed(final int errorCode) {
+        @Override
+        public void onScanFailed(final int errorCode) {
             /*
            switch (errorCode) {
                 case SCAN_FAILED_ALREADY_STARTED:
@@ -376,12 +376,12 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
                     promise.reject("Fails to start power optimized scan as this feature is not supported."); break;
                 case SCAN_FAILED_INTERNAL_ERROR:
                     promise.reject("Fails to start scan due an internal error"); break;
-                default: 
+                default:
                     promise.reject("Scan failed: " + errorCode);
             }
             promise.reject("Scan failed: Should not be here. ");*/
-		}
-	};
+        }
+    };
 
     @ReactMethod
     public void enableAdapter() {
@@ -438,49 +438,58 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
         }
 
         Log.d(TAG, "GetAdapter State" + String.valueOf(mBluetoothAdapter.getState()));
-        promise.resolve(mBluetoothAdapter.getState() == BluetoothAdapter.STATE_ON); 
+        promise.resolve(mBluetoothAdapter.getState() == BluetoothAdapter.STATE_ON);
     }
 
-    private AdvertiseSettings buildAdvertiseSettings(ReadableMap options) {
-        AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
+private AdvertiseSettings buildAdvertiseSettings(ReadableMap options) {
+    AdvertiseSettings.Builder settingsBuilder =    new AdvertiseSettings.Builder();
 
-        if (options != null && options.hasKey("advertiseMode")) {
-            settingsBuilder.setAdvertiseMode(options.getInt("advertiseMode"));
-        }
+    //Default
+    settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY);
 
-        if (options != null && options.hasKey("txPowerLevel")) {
-            settingsBuilder.setTxPowerLevel(options.getInt("txPowerLevel"));
-        }
+    settingsBuilder.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH);
 
-        if (options != null && options.hasKey("connectable")) {
-            settingsBuilder.setConnectable(options.getBoolean("connectable"));
-        }
+    settingsBuilder.setConnectable(true);
 
-        if (options != null && options.hasKey("timeout")) {
-            settingsBuilder.setTimeout(options.getInt("timeout"));
-        }
-
-        settingsBuilder.setConnectable(false);
-        //settingsBuilder.setTimeout(1000);
-        settingsBuilder.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH);
-        //settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED);
-
-        return settingsBuilder.build();
+    //options
+    if (options != null && options.hasKey("advertiseMode")) {
+        settingsBuilder.setAdvertiseMode(options.getInt("advertiseMode"));
     }
 
-    private AdvertiseData buildAdvertiseData(ParcelUuid uuid, byte[] payload, ReadableMap options) {
-        AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
-
-        if (options != null && options.hasKey("includeDeviceName")) 
-            dataBuilder.setIncludeDeviceName(options.getBoolean("includeDeviceName"));
-        
-         if (options != null && options.hasKey("includeTxPowerLevel")) 
-            dataBuilder.setIncludeTxPowerLevel(options.getBoolean("includeTxPowerLevel"));
-        
-        dataBuilder.addManufacturerData(companyId, payload);
-        //dataBuilder.addServiceUuid(uuid);
-        return dataBuilder.build();
+    if (options != null && options.hasKey("txPowerLevel")) {
+        settingsBuilder.setTxPowerLevel(options.getInt("txPowerLevel"));
     }
+
+    if (options != null && options.hasKey("connectable")) {
+        settingsBuilder.setConnectable(options.getBoolean("connectable"));
+    }
+
+    if (options != null && options.hasKey("timeout")) {
+        settingsBuilder.setTimeout(options.getInt("timeout"));
+    }
+
+    return settingsBuilder.build();
+}
+
+private AdvertiseData buildAdvertiseData( ParcelUuid uuid, byte[] payload, ReadableMap options){
+    AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
+
+    //Default
+    dataBuilder.setIncludeDeviceName(false);
+    dataBuilder.setIncludeTxPowerLevel(false);
+
+    //options
+    if (options != null && options.hasKey("includeDeviceName")) 
+        dataBuilder.setIncludeDeviceName(options.getBoolean("includeDeviceName"));
+
+    if (options != null && options.hasKey("includeTxPowerLevel"))
+        dataBuilder.setIncludeTxPowerLevel(options.getBoolean("includeTxPowerLevel"));
+    
+
+    dataBuilder.addManufacturerData(0x004C, payload);
+    // dataBuilder.addServiceUuid(uuid);
+    return dataBuilder.build();
+}
 
     private class SimpleAdvertiseCallback extends AdvertiseCallback {
         Promise promise;
@@ -531,24 +540,24 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
             if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
                 final int prevState = intent.getIntExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, BluetoothAdapter.ERROR);
-                
+
                 Log.d(TAG, String.valueOf(state));
                 switch (state) {
-                case BluetoothAdapter.STATE_OFF:
-                    mObservedState = false;
-                    break;
-                case BluetoothAdapter.STATE_TURNING_OFF:
-                    mObservedState = false;
-                    break;
-                case BluetoothAdapter.STATE_ON:
-                    mObservedState = true;
-                    break;
-                case BluetoothAdapter.STATE_TURNING_ON:
-                    mObservedState = true;
-                    break;
+                    case BluetoothAdapter.STATE_OFF:
+                        mObservedState = false;
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_OFF:
+                        mObservedState = false;
+                        break;
+                    case BluetoothAdapter.STATE_ON:
+                        mObservedState = true;
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_ON:
+                        mObservedState = true;
+                        break;
                 }
 
-                // Only send enabled when fully ready. Turning on and Turning OFF are seen as disabled. 
+                // Only send enabled when fully ready. Turning on and Turning OFF are seen as disabled.
                 if (state == BluetoothAdapter.STATE_ON && prevState != BluetoothAdapter.STATE_ON) {
                     WritableMap params = Arguments.createMap();
                     params.putBoolean("enabled", true);
@@ -564,8 +573,8 @@ public class BLEAdvertiserModule extends ReactContextBaseJavaModule {
 
     private void sendEvent(String eventName, WritableMap params) {
         getReactApplicationContext()
-            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-            .emit(eventName, params);
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(eventName, params);
     }
 
     // @Override
